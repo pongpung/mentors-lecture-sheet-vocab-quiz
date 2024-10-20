@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        .quiz-section {
+            margin: 25px 0;
+        }
+        .question {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #34495e;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+        .progress {
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            color: #27ae60;
+        }
+        .feedback.wrong {
+            color: #e74c3c;
+        }
+        .sentence {
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #b2bec3;
+            cursor: not-allowed;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 100%;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vocabulary Quiz</h1>
+
+        <div class="quiz-section">
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option" onclick="checkAnswer(0)"></button>
+                <button class="option" onclick="checkAnswer(1)"></button>
+                <button class="option" onclick="checkAnswer(2)"></button>
+                <button class="option" onclick="checkAnswer(3)"></button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <p>Question: <span id="currentQuestion">1</span>/45</p>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="sentence" id="sentence"></div>
+        <div class="score" id="score"></div>
+
+        <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
+        <button onclick="resetQuiz()">Reset Quiz</button>
+    </div>
+
+    <script>
+const vocabList = [
+    { word: "Implausible", definition: "unlikely; unbelievable", sentence: "Though her alibi seemed implausible, it in fact turned out to be true." },
+    { word: "Implement", definition: "put into effect; supply with tools", sentence: "The mayor was unwilling to implement the plan until she was sure it had the governor's backing." },
+    { word: "Impregnable", definition: "invulnerable", sentence: "Until the development of the airplane as a military weapon, the fort was considered impregnable." },
+    { word: "Impudence", definition: "impertinence; insolence", sentence: "Kissed on the cheek by a perfect stranger, Lady Catherine exclaimed, 'Of all the nerve! Young man, I should have you horse-whipped for your impudence.'" },
+    { word: "Inadvertently", definition: "unintentionally; by oversight; carelessly", sentence: "Judy's great fear was that she might inadvertently omit a question on the exam and mismark her whole answer sheet." },
+    { word: "Inane", definition: "silly; senseless", sentence: "There's no point to what you're saying. Why are you bothering to make such inane remarks?" },
+    { word: "Incidental", definition: "not essential; minor", sentence: "The scholarship covered his major expenses at college and some of his incidental expenses as well." },
+    { word: "Incisive", definition: "cutting; sharp", sentence: "His incisive remarks made us see the fallacy in our plans." },
+    { word: "Incite", definition: "arouse to action; goad; motivate", sentence: "In a fiery speech, Mario incited his fellow students to go out on strike to protest the university's anti-affirmative action stand." },
+    { word: "Incoherence", definition: "unintelligibility; lack of logic or relevance", sentence: "\"This essay makes no sense at all,\" commented the teacher, giving it an F because of its incoherence." },
+    { word: "Incongruous", definition: "not fitting; absurd", sentence: "Dave saw nothing incongruous about wearing sneakers with his tuxedo; he couldn't understand why his date took one look at him and started to laugh." },
+    { word: "Inconsequential", definition: "insignificant; unimportant", sentence: "Brushing off Ali's apologies for having broken the wineglass, Tamara said, \"Don't worry about it; it's inconsequential.\""},
+    { word: "Innate", definition: "inborn", sentence: "Mozart's parents soon recognized young Wolfgang's innate talent for music." },
+    { word: "Inexorable", definition: "relentless; unyielding; implacable", sentence: " After listening to the pleas for clemency, the judge was inexorable and gave the convicted man the maximum punishment allowed by law." },
+    { word: "Innocuous", definition: "harmless", sentence: "An occasional glass of wine with dinner is relatively innocuous and should have no ill effect on you." },
+    { word: "Inherent", definition: "firmly established by nature or habit", sentence: "Katya's inherent love of justice caused her to champion anyone she considered treated unfairly by society." },
+    { word: "Ingenious", definition: "clever; resourceful", sentence: "Kit admired the ingenious way that her computer keyboard opened up to reveal." },
+    { word: "Insipid", definition: "lacking in flavor; dull", sentence: "Flat prose and flat ginger ale are equally insipid; both lack sparkle." },
+    { word: "Insolvent", definition: "bankrupt; unable to repay one's debts", sentence: "Although young Lord Widgeon was insolvent, he had no fear of being thrown into debtors' prison, for he was sure that if his creditors pressed him for payment, his wealthy parents would repay what he owed." },
+    { word: "Instigate", definition: "urge; start; provoke", sentence: "Rumors of police corruption led the mayor to instigate an investigation into the department's activities." },
+    { word: "Insularity", definition: "narrow-mindedness; isolation", sentence: "The insularity of the islanders manifested itself in their suspicion of anything foreign." },
+    { word: "Insuperable", definition: "insurmountable; unbeatable", sentence: "Though the odds against their survival seemed insuperable, the Apollo 13 astronauts reached Earth safely." },
+    { word: "Integrity", definition: "uprightness; wholeness", sentence: "Lincoln, whose personal integrity has inspired millions, fought a civil war to maintain the integrity of the Republic, that these United States might remain undivided for all time." },
+    { word: "Intervene", definition: "come between", sentence: "When two close friends get into a fight, be careful if you try to intervene; they may join forces to gang up on you." },
+    { word: "Intimidate", definition: "frighten", sentence: "I'll learn karate and then those big bullies won't be able to intimidate me anymore." },
+    { word: "Intractable", definition: "unruly; stubborn; unyielding", sentence: "Charlie Brown's friend Pigpen was intractable; he absolutely refused to take a bath." },
+    { word: "Intrepid", definition: "fearless", sentence: "For her intrepid conduct nursing the wounded during the war, Florence Nightingale was honored by Queen Victoria." },
+    { word: "Intrude", definition: "trespass; enter as an uninvited person", sentence: "She hesitated to intrude on their conversation." },
+    { word: "Intuition", definition: "immediate insight; power of knowing without reasoning", sentence: "Even though Tony denied that anything was wrong, Tina trusted her intuition that something was bothering him." },
+    { word: "Inundate", definition: "overwhelm; flood; submerge", sentence: "This semester I am inundated with work; you should see the piles of paperwork flooding my desk." },
+    { word: "Jollity", definition: "gaiety; cheerfulness", sentence: "The festive Christmas dinner was a merry one, and old and young alike joined in the general jollity." },
+    { word: "Irreproachable", definition: "blameless; impeccable", sentence: "Homer's conduct at the office party was irreproachable; even Marge didn't have anything bad to say about how he behaved." },
+    { word: "Labyrinth", definition: "maze", sentence: "Hiding from Indian Joe, Tom and Becky soon lost themselves in the labyrinth of secret underground caves." },
+    { word: "Laconic", definition: "brief and to the point", sentence: "Many of the characters portrayed by Clint Eastwood are laconic types: strong men of few words." },
+    { word: "Laggard", definition: "slow; sluggish", sentence: "The sailor had been taught not to be laggard in carrying out orders." },
+    { word: "Lament", definition: "grieve; express sorrow", sentence: "Even advocates of the war lamented the loss of so many lives in combat." },
+    { word: "Lampoon", definition: "ridicule", sentence: "This article lampoons the pretensions of some movie moguls." },
+    { word: "Lassitude", definition: "languor; weariness", sentence: "After a massage and a long soak in the hot tub, I gave in to my growing lassitude and lay down for a nap." },
+    { word: "Laud", definition: "praise", sentence: "The NFL lauded Boomer Esiason's efforts to raise money to combat cystic fibrosis." },
+    { word: "Lavish", definition: "generous; openhanded; extravagant; wasteful", sentence: "Her wealthy suitors wooed her with lavish gifts." },
+    { word: "Lethargic", definition: "drowsy; dull", sentence: "The stuffy room made her lethargic; she felt as if she was about to nod off." },
+    { word: "Levity", definition: "lack of seriousness; lightness", sentence: "Stop giggling and wriggling around in the pew; such levity is improper in church." },
+    { word: "Linger", definition: "loiter or dawdle; continue or persist", sentence: "Hoping to see Juliet pass by, Romeo lingered outside the Capulet house for hours." },
+    { word: "Listless", definition: "lacking in spirit or energy", sentence: "We had expected him to be full of enthusiasm and were surprised by his listless attitude." },
+    { word: "Lithe", definition: "flexible; supple", sentence: "Her figure was lithe and willowy." },
+    { word: "Lofty", definition: "very high", sentence: "Though Barbara Jordan's fellow students used to tease her about her lofty ambitions, she rose to hold one of the highest positions in the land." },
+    { word: "Lurid", definition: "wild; sensational; graphic; gruesome", sentence: "Do the lurid cover stories in the Enquirer actually attract people to buy that trashy tabloid?" },
+    { word: "Luxuriant", definition: "abundant; rich and splendid; fertile", sentence: "Lady Godiva was completely covered by her luxuriant hair." },
+    { word: "Malicious", definition: "hateful; spiteful", sentence: "Jealous of Cinderella's beauty, her malicious stepsisters expressed their spite by forcing her to do menial tasks." },
+    { word: "Marred", definition: "damaged; disfigured", sentence: "She had to refinish the marred surface of the table." },
+    { word: "Meander", definition: "wind or turn in its course", sentence: "Needing to stay close to a source of water, he followed every twist and turn." },
+    { word: "Mercenary", definition: "Interested in money or gain", sentence: "Andy's every act was prompted by mercenary motives: his first question was always, 'What's in it for me?'" },
+
+];
+
+
+
+
+
+let currentQuestion = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+function loadQuestion() {
+    const questionElement = document.getElementById('question');
+    const options = document.getElementsByClassName('option');
+    const currentVocab = vocabList[currentQuestion];
+
+    questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
+
+    let correctAnswerIndex = Math.floor(Math.random() * 4);
+    options[correctAnswerIndex].innerText = currentVocab.definition;
+
+    let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
+    wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
+
+    let wrongIndex = 0;
+    for (let i = 0; i < 4; i++) {
+        if (i !== correctAnswerIndex) {
+            options[i].innerText = wrongOptions[wrongIndex].definition;
+            wrongIndex++;
+        }
+        options[i].disabled = false;  // Ensure buttons are enabled
+    }
+
+    document.getElementById('nextButton').style.display = "none";
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('sentence').innerText = '';
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function checkAnswer(selectedOption) {
+    const options = document.getElementsByClassName('option');
+    const feedbackElement = document.getElementById('feedback');
+    const sentenceElement = document.getElementById('sentence');
+
+    if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
+        feedbackElement.innerText = "Correct!";
+        feedbackElement.classList.add("correct");
+        feedbackElement.classList.remove("wrong");
+        score++;
+    } else {
+        feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
+        feedbackElement.classList.add("wrong");
+        feedbackElement.classList.remove("correct");
+        incorrectAnswers.push({
+            word: vocabList[currentQuestion].word,
+            correctAnswer: vocabList[currentQuestion].definition,
+            userAnswer: options[selectedOption].innerText
+        });
+    }
+
+    sentenceElement.innerText = vocabList[currentQuestion].sentence;
+
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = true;  // Disable all options after an answer is selected
+    }
+
+    document.getElementById('currentQuestion').innerText = currentQuestion + 1;
+    document.getElementById('nextButton').style.display = "block";
+}
+
+function nextQuestion() {
+    if (currentQuestion < vocabList.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        document.getElementById('score').innerText = `You scored ${score} out of ${vocabList.length}`;
+        document.getElementById('nextButton').style.display = "none";
+        displayIncorrectAnswers();
+    }
+}
+
+function displayIncorrectAnswers() {
+    const container = document.createElement('div');
+    container.id = 'incorrect-answers';
+    container.innerHTML = `<h2>Incorrect Answers:</h2>`;
+
+    incorrectAnswers.forEach(item => {
+        const answer = document.createElement('p');
+        answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
+        container.appendChild(answer);
+    });
+
+    document.querySelector('.container').appendChild(container);
+}
+
+function resetQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    incorrectAnswers = [];
+    document.getElementById('score').innerText = '';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('feedback').classList.remove("correct", "wrong");
+    document.getElementById('sentence').innerText = '';
+
+    const incorrectAnswersContainer = document.getElementById('incorrect-answers');
+    if (incorrectAnswersContainer) {
+        incorrectAnswersContainer.remove();
+    }
+
+    loadQuestion();
+}
+
+window.onload = function () {
+    loadQuestion();
+};
+    </script>
+
+</body>
+</html>

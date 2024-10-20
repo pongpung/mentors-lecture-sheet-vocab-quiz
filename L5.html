@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        .quiz-section {
+            margin: 25px 0;
+        }
+        .question {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #34495e;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+        .progress {
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            color: #27ae60;
+        }
+        .feedback.wrong {
+            color: #e74c3c;
+        }
+        .sentence {
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #b2bec3;
+            cursor: not-allowed;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 100%;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vocabulary Quiz</h1>
+
+        <div class="quiz-section">
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option" onclick="checkAnswer(0)"></button>
+                <button class="option" onclick="checkAnswer(1)"></button>
+                <button class="option" onclick="checkAnswer(2)"></button>
+                <button class="option" onclick="checkAnswer(3)"></button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <p>Question: <span id="currentQuestion">1</span>/40</p>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="sentence" id="sentence"></div>
+        <div class="score" id="score"></div>
+
+        <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
+        <button onclick="resetQuiz()">Reset Quiz</button>
+    </div>
+
+    <script>
+const vocabList = [
+    // Previous vocabulary entries...
+    { word: "Dupe", definition: "someone easily fooled", sentence: "While the gullible Watson often was made a dupe by unscrupulous parties, Sherlock Holmes was far more difficult to fool." },
+    { word: "Duplicity", definition: "double-dealing; hypocrisy", sentence: "When Tanya learned that Mark had been two-timing her, she was furious at his duplicity." },
+    { word: "Ebullient", definition: "showing excitement; overflowing with enthusiasm", sentence: "Amy's ebullient nature could not be repressed; she was always bubbling over with excitement." },
+    { word: "Eclectic", definition: "composed of elements drawn from disparate sources", sentence: "His style of interior decoration was eclectic: bits and pieces of furnishings from widely divergent periods strikingly juxtaposed to create a unique decor." },
+    { word: "Edify", definition: "instruct; correct morally", sentence: "Although his purpose was to edify and not to entertain his audience, many of his listeners were amused rather than enlightened." },
+    { word: "Effectual", definition: "able to produce a desired effect; valid", sentence: "Medical researchers are concerned because of the development of drug-resistant strains of bacteria; many once useful antibiotics are no longer effectual in curing bacterial infections." },
+    { word: "Effervescence", definition: "inner excitement of exuberance; bubbling from fermentation or carbonation", sentence: "Nothing depressed Sue for long; her natural effervescence soon reasserted itself." },
+    { word: "Egotistical", definition: "excessively self-centered; self-important; conceited", sentence: "Typical egotistical remark: 'But enough of this chit-chat about you and your little problems. Let's talk about what's really important: Me!'" },
+    { word: "Elated", definition: "overjoyed; in high spirits", sentence: "Grinning from ear to ear, Bonnie Blair was clearly elated by her fifth Olympic gold medal." },
+    { word: "Elegy", definition: "poem or song expressing lamentation", sentence: "On the death of Edward King, Milton composed the elegy 'Lycidas.'" },
+    { word: "Elixir", definition: "cure-all; something invigorating", sentence: "The news of her chance to go abroad acted on her like an elixir." },
+    { word: "Eloquence", definition: "expressiveness; persuasive speech", sentence: "The crowds were stirred by Martin Luther King's eloquence." },
+    { word: "Elucidate", definition: "explain; enlighten", sentence: "He was called upon to elucidate the disputed points in his article." },
+    { word: "Elusive", definition: "evasive; baffling; hard to grasp", sentence: "Trying to pin down exactly when the contractors would be finished remodeling the house, Nancy was frustrated by their elusive replies." },
+    { word: "Emaciated", definition: "thin and wasted", sentence: "Many severe illnesses leave their victims so emaciated that they must gain back their lost weight before they can fully recover." },
+    { word: "Embellish", definition: "adorn; ornament", sentence: "The costume designer embellished the leading lady's ball gown with yards and yards of ribbon and lace." },
+    { word: "Emend", definition: "correct; correct by a critic", sentence: "The critic emended the book by selecting the passages which he thought most appropriate to the text." },
+    { word: "Emulate", definition: "imitate; rival", sentence: "In a brief essay, describe a person you admire, someone whose virtues you would like to emulate." },
+    { word: "Endorse", definition: "approve; support", sentence: "Everyone waited to see which one of the rival candidates for the city council the mayor would endorse." },
+    { word: "Enigma", definition: "puzzle; mystery", sentence: "\"What do women want?\" asked Dr. Sigmund Freud. Their behavior was an enigma to him." },
+    { word: "Ephemeral", definition: "short-lived; fleeting", sentence: "The mayfly is an ephemeral creature: its adult life lasts little more than a day." },
+    { word: "Equanimity", definition: "calmness of temperament; composure", sentence: "Even the inevitable strains of caring for an ailing mother did not disturb Bea's equanimity." },
+    { word: "Excerpt", definition: "selected passage (written or musical)", sentence: "The cinematic equivalent of an excerpt from a novel is a clip from a film." },
+    { word: "Equitable", definition: "fair; impartial", sentence: "I am seeking an equitable solution to this dispute, one that will be fair and acceptable to both sides." },
+    { word: "Equity", definition: "fairness; justice", sentence: "Our courts guarantee equity to all." },
+    { word: "Equivocal", definition: "ambiguous; intentionally misleading", sentence: "Rejecting the candidate's equivocal comments on tax reform, the reporters pressed him to state clearly where he stood on the issue." },
+    { word: "Erroneous", definition: "mistaken; wrong", sentence: "I thought my answer was correct, but it was erroneous." },
+    { word: "Erudite", definition: "learned; scholarly", sentence: "Unlike much scholarly writing, Huizinga's prose was entertaining as well as erudite." },
+    { word: "Esoteric", definition: "hard to understand; known only to the chosen few", sentence: "The New Yorker short stories often include esoteric allusions to obscure people and events." },
+    { word: "Eulogy", definition: "expression of praise, often on the occasion of someone's death", sentence: "Instead of delivering a spoken eulogy at Genny's memorial service, Jeff sang a song he had written in her honor." },
+    { word: "Euphemism", definition: "mild expression in place of an unpleasant one", sentence: "The expression 'he passed away' is a euphemism for 'he died.'" },
+    { word: "Euphonious", definition: "pleasing in sound", sentence: "Euphonious even when spoken, the Italian language is particularly pleasing to the ear when sung." },
+    { word: "Exacerbate", definition: "worsen; embitter", sentence: "The latest bombing exacerbated England's already existing bitterness against the IRA." },
+    { word: "Exalt", definition: "raise in rank or dignity; praise", sentence: "The actor Alec Guinness was exalted to the rank of knighthood by the queen." },
+    { word: "Exhaustive", definition: "thorough; comprehensive", sentence: "We have made an exhaustive study of all published SAT tests and are happy to share our research with you." },
+    { word: "Exhilarating", definition: "invigorating; refreshing; cheering", sentence: "Though some of the hikers found tramping through the snow tiring, Jeffrey found the walk on the cold, crisp day exhilarating." },
+    { word: "Exonerate", definition: "acquit; exculpate", sentence: "The defense team feverishly sought fresh evidence that might exonerate their client." },
+    { word: "Exorbitant", definition: "excessive", sentence: "The people grumbled at his exorbitant prices but paid them because he had a monopoly." },
+    { word: "Expedient", definition: "suitable; practical; politic", sentence: "A pragmatic politician, he was guided by what was expedient rather than by what was ethical." },
+    { word: "Expedite", definition: "hasten", sentence: "Because we are on a tight schedule, we hope you will be able to expedite the delivery of our order." },
+    { word: "Explicit", definition: "totally clear; definite; outspoken", sentence: "Don't just hint around that you're dissatisfied: be explicit about what's bugging you." },
+    { word: "Exploit", definition: "make use of, sometimes unjustly", sentence: "Cesar Chavez fought attempts to exploit migrant farmworkers in California." },
+    { word: "Extol", definition: "praise; glorify", sentence: "The president extolled the astronauts, calling them the pioneers of the Space Age." },
+    { word: "Extraneous", definition: "not essential; superfluous", sentence: "No wonder Ted can't think straight! His mind is so cluttered up with extraneous trivia, he can't concentrate on the essentials." },
+    { word: "Extricate", definition: "free; disentangle", sentence: "Icebreakers were needed to extricate the trapped whales from the icy floes that closed them in." }
+];
+
+
+
+
+let currentQuestion = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+function loadQuestion() {
+    const questionElement = document.getElementById('question');
+    const options = document.getElementsByClassName('option');
+    const currentVocab = vocabList[currentQuestion];
+
+    questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
+
+    let correctAnswerIndex = Math.floor(Math.random() * 4);
+    options[correctAnswerIndex].innerText = currentVocab.definition;
+
+    let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
+    wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
+
+    let wrongIndex = 0;
+    for (let i = 0; i < 4; i++) {
+        if (i !== correctAnswerIndex) {
+            options[i].innerText = wrongOptions[wrongIndex].definition;
+            wrongIndex++;
+        }
+        options[i].disabled = false;  // Ensure buttons are enabled
+    }
+
+    document.getElementById('nextButton').style.display = "none";
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('sentence').innerText = '';
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function checkAnswer(selectedOption) {
+    const options = document.getElementsByClassName('option');
+    const feedbackElement = document.getElementById('feedback');
+    const sentenceElement = document.getElementById('sentence');
+
+    if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
+        feedbackElement.innerText = "Correct!";
+        feedbackElement.classList.add("correct");
+        feedbackElement.classList.remove("wrong");
+        score++;
+    } else {
+        feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
+        feedbackElement.classList.add("wrong");
+        feedbackElement.classList.remove("correct");
+        incorrectAnswers.push({
+            word: vocabList[currentQuestion].word,
+            correctAnswer: vocabList[currentQuestion].definition,
+            userAnswer: options[selectedOption].innerText
+        });
+    }
+
+    sentenceElement.innerText = vocabList[currentQuestion].sentence;
+
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = true;  // Disable all options after an answer is selected
+    }
+
+    document.getElementById('currentQuestion').innerText = currentQuestion + 1;
+    document.getElementById('nextButton').style.display = "block";
+}
+
+function nextQuestion() {
+    if (currentQuestion < vocabList.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        document.getElementById('score').innerText = `You scored ${score} out of ${vocabList.length}`;
+        document.getElementById('nextButton').style.display = "none";
+        displayIncorrectAnswers();
+    }
+}
+
+function displayIncorrectAnswers() {
+    const container = document.createElement('div');
+    container.id = 'incorrect-answers';
+    container.innerHTML = `<h2>Incorrect Answers:</h2>`;
+
+    incorrectAnswers.forEach(item => {
+        const answer = document.createElement('p');
+        answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
+        container.appendChild(answer);
+    });
+
+    document.querySelector('.container').appendChild(container);
+}
+
+function resetQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    incorrectAnswers = [];
+    document.getElementById('score').innerText = '';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('feedback').classList.remove("correct", "wrong");
+    document.getElementById('sentence').innerText = '';
+
+    const incorrectAnswersContainer = document.getElementById('incorrect-answers');
+    if (incorrectAnswersContainer) {
+        incorrectAnswersContainer.remove();
+    }
+
+    loadQuestion();
+}
+
+window.onload = function () {
+    loadQuestion();
+};
+    </script>
+
+</body>
+</html>

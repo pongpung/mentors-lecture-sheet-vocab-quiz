@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        .quiz-section {
+            margin: 25px 0;
+        }
+        .question {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #34495e;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+        .progress {
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            color: #27ae60;
+        }
+        .feedback.wrong {
+            color: #e74c3c;
+        }
+        .sentence {
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #b2bec3;
+            cursor: not-allowed;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 100%;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vocabulary Quiz</h1>
+
+        <div class="quiz-section">
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option" onclick="checkAnswer(0)"></button>
+                <button class="option" onclick="checkAnswer(1)"></button>
+                <button class="option" onclick="checkAnswer(2)"></button>
+                <button class="option" onclick="checkAnswer(3)"></button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <p>Question: <span id="currentQuestion">1</span>/45</p>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="sentence" id="sentence"></div>
+        <div class="score" id="score"></div>
+
+        <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
+        <button onclick="resetQuiz()">Reset Quiz</button>
+    </div>
+
+    <script>
+const vocabList = [
+    { word: "Commemorate", definition: "honor the memory of", sentence: "The statue of the Minute Man commemorates the valiant soldiers who fought in the Revolutionary War." },
+    { word: "Compile", definition: "assemble; gather; accumulate", sentence: "We planned to compile a list of the words most frequently used on SAT examinations." },
+    { word: "Complacency", definition: "self-satisfaction; smugness", sentence: "Full of complacency about his latest victories, he looked smugly at the row of trophies on his mantelpiece." },
+    { word: "Complementary", definition: "serving to complete something", sentence: "John and Lisa's skills are complementary; he's good at following a daily routine, while she's great at improvising and handling emergencies." },
+    { word: "Compliance", definition: "readiness to yield; conformity in fulfilling requirements", sentence: "Bullheaded Bill was not noted for easy compliance with the demands of others." },
+    { word: "Composure", definition: "mental calmness", sentence: "Even the latest work crisis failed to shake her composure." },
+    { word: "Comprehensive", definition: "thorough; inclusive", sentence: "This book provides a comprehensive review of verbal and math skills for the SAT." },
+    { word: "Compress", definition: "close; squeeze; contract", sentence: "She compressed the package under her arm." },
+    { word: "Concede", definition: "admit; yield", sentence: "Despite all the evidence Monica had assembled, Mark refused to concede that she was right." },
+    { word: "Conciliatory", definition: "reconciling; soothing", sentence: "She was still angry despite his conciliatory words." },
+    { word: "Concise", definition: "brief and compact", sentence: "When you define a new word, be concise: the shorter the definition, the easier it is to remember." },
+    { word: "Concur", definition: "agree", sentence: "Did you concur with the decision of the court or did you find it unfair?" },
+    { word: "Condone", definition: "overlook; forgive; give tacit approval", sentence: "Unlike Widow Douglass, who condoned Huck's minor offenses, Miss Watson did nothing but scold." },
+    { word: "Conflagration", definition: "great fire", sentence: "In the conflagration that followed the 1906 earthquake, much of San Francisco was destroyed." },
+    { word: "Confluence", definition: "flowing together; crowd", sentence: "They built the city at the confluence of two rivers." },
+    { word: "Confound", definition: "confuse; puzzle", sentence: "No mystery could confound Sherlock Holmes for long." },
+    { word: "Conjecture", definition: "surmise; guess", sentence: "It's all conjecture; you can't really prove anything." },
+    { word: "Consensus", definition: "general agreement", sentence: "Every time the garden club members had nearly reached a consensus about what to plant, Mistress Mary, quite contrary, disagreed." },
+    { word: "Constraint", definition: "compulsion; repression of feelings", sentence: "There was a feeling of constraint in the room because no one dared to criticize the speaker." },
+    { word: "Contend", definition: "struggle; compete; assert earnestly", sentence: "Sociologist Harry Edwards contends that young black athletes are exploited by some college recruiters." },
+    { word: "Contentious", definition: "quarrelsome", sentence: "Disagreeing violently with the referees' ruling, the coach became so contentious that they threw him out of the game." },
+    { word: "Contract", definition: "compress or shrink; make a pledge; catch a disease", sentence: "Warm metal expands; cold metal contracts." },
+    { word: "Converge", definition: "approach; tend to meet; come together", sentence: "African-American men from all over the United States converged on Washington to take part in the historic Million Men march." },
+    { word: "Conviction", definition: "judgment that someone is guilty of a crime; strongly held belief", sentence: "Even her conviction for murder did not shake Peter's conviction that Harriet was innocent of the crime." },
+    { word: "Cordial", definition: "gracious; heartfelt", sentence: "Our hosts greeted us at the airport with a cordial welcome and a hearty hug." },
+    { word: "Corroborate", definition: "confirm; support", sentence: "Though Huck was quite willing to corroborate Tom's story, Aunt Polly knew better than to believe either of them." },
+    { word: "Corrode", definition: "destroy by chemical action", sentence: "The girders supporting the bridge corroded so gradually that no one suspected any danger until the bridge suddenly collapsed." },
+    { word: "Credulity", definition: "belief on slight evidence; gullibility; naivete", sentence: "Con artists take advantage of the credulity of inexperienced investors to swindle them out of their savings." },
+    { word: "Creed", definition: "system of religious or ethical belief", sentence: "Any loyal American's creed must emphasize love of democracy." },
+    { word: "Cryptic", definition: "mysterious; hidden; secret", sentence: "Thoroughly baffled by Holmes's cryptic remarks, Watson wondered whether Holmes was intentionally concealing his thoughts." },
+    { word: "Culpable", definition: "deserving blame", sentence: "Corrupt politicians who condone the activities of the gamblers are equally culpable." },
+    { word: "Cursory", definition: "casual; hastily done", sentence: "Because a cursory examination of the ruins indicates the possibility of arson, we believe the insurance agency should undertake a more extensive investigation." },
+    { word: "Curtail", definition: "shorten; reduce", sentence: "When Herb asked Diane for a date, she said she was really sorry she couldn't go out with him, but her dad had ordered her to curtail her social life." },
+    { word: "Debilitate", definition: "weaken; enfeeble", sentence: "Michael's severe bout of the flu debilitated him so much that he was too tired to go to work for a week." },
+    { word: "Debunk", definition: "expose as false; ridicule", sentence: "Pointing out that he consistently had voted against strengthening anti-pollution legislation, reporters debunked the candidate's claim that he was a fervent environmentalist." },
+    { word: "Decorum", definition: "propriety; orderliness and good taste in manners", sentence: "Even the best-mannered students have trouble behaving with decorum on the last day of school." },
+    { word: "Deference", definition: "courteous regard for another's wish", sentence: "In deference to the minister's request, please do not take photographs during the wedding service." },
+    { word: "Degradation", definition: "humiliation; debasement; degeneration", sentence: "Some secretaries object to fetching the boss a cup of coffee because they resent the degradation of being made to do such lowly tasks." },
+    { word: "Dehydrate", definition: "remove water from; dry out", sentence: "Running under a hot sun quickly dehydrates the body; joggers soon learn to carry water bottles and to drink from them frequently." }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+function loadQuestion() {
+    const questionElement = document.getElementById('question');
+    const options = document.getElementsByClassName('option');
+    const currentVocab = vocabList[currentQuestion];
+
+    questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
+
+    let correctAnswerIndex = Math.floor(Math.random() * 4);
+    options[correctAnswerIndex].innerText = currentVocab.definition;
+
+    let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
+    wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
+
+    let wrongIndex = 0;
+    for (let i = 0; i < 4; i++) {
+        if (i !== correctAnswerIndex) {
+            options[i].innerText = wrongOptions[wrongIndex].definition;
+            wrongIndex++;
+        }
+        options[i].disabled = false;  // Ensure buttons are enabled
+    }
+
+    document.getElementById('nextButton').style.display = "none";
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('sentence').innerText = '';
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function checkAnswer(selectedOption) {
+    const options = document.getElementsByClassName('option');
+    const feedbackElement = document.getElementById('feedback');
+    const sentenceElement = document.getElementById('sentence');
+
+    if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
+        feedbackElement.innerText = "Correct!";
+        feedbackElement.classList.add("correct");
+        feedbackElement.classList.remove("wrong");
+        score++;
+    } else {
+        feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
+        feedbackElement.classList.add("wrong");
+        feedbackElement.classList.remove("correct");
+        incorrectAnswers.push({
+            word: vocabList[currentQuestion].word,
+            correctAnswer: vocabList[currentQuestion].definition,
+            userAnswer: options[selectedOption].innerText
+        });
+    }
+
+    sentenceElement.innerText = vocabList[currentQuestion].sentence;
+
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = true;  // Disable all options after an answer is selected
+    }
+
+    document.getElementById('currentQuestion').innerText = currentQuestion + 1;
+    document.getElementById('nextButton').style.display = "block";
+}
+
+function nextQuestion() {
+    if (currentQuestion < vocabList.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        document.getElementById('score').innerText = `You scored ${score} out of ${vocabList.length}`;
+        document.getElementById('nextButton').style.display = "none";
+        displayIncorrectAnswers();
+    }
+}
+
+function displayIncorrectAnswers() {
+    const container = document.createElement('div');
+    container.id = 'incorrect-answers';
+    container.innerHTML = `<h2>Incorrect Answers:</h2>`;
+
+    incorrectAnswers.forEach(item => {
+        const answer = document.createElement('p');
+        answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
+        container.appendChild(answer);
+    });
+
+    document.querySelector('.container').appendChild(container);
+}
+
+function resetQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    incorrectAnswers = [];
+    document.getElementById('score').innerText = '';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('feedback').classList.remove("correct", "wrong");
+    document.getElementById('sentence').innerText = '';
+
+    const incorrectAnswersContainer = document.getElementById('incorrect-answers');
+    if (incorrectAnswersContainer) {
+        incorrectAnswersContainer.remove();
+    }
+
+    loadQuestion();
+}
+
+window.onload = function () {
+    loadQuestion();
+};
+    </script>
+
+</body>
+</html>

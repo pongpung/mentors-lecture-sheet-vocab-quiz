@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,88 +6,111 @@
     <title>Vocabulary Quiz</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
             margin: 0;
-            padding: 50px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            color: #333;
         }
         .container {
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
+            text-align: center;
         }
         h1 {
-            font-size: 24px;
-            text-align: center;
-            color: #333;
+            font-size: 2rem;
+            color: #2c3e50;
         }
         .quiz-section {
-            margin: 20px 0;
+            margin: 25px 0;
         }
         .question {
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #34495e;
         }
         .options {
             display: flex;
             flex-direction: column;
         }
         .option {
-            margin:10px;
             background-color: #007bff;
             color: white;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            text-align: left;
+            margin: 8px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
         }
         .option:hover {
             background-color: #0056b3;
+            transform: translateY(-3px);
         }
         .progress {
-            text-align: center;
-            margin: 10px 0;
+            margin: 20px 0;
+            font-size: 1rem;
         }
         .feedback {
-            margin-top: 10px;
-            font-size: 16px;
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: bold;
         }
         .feedback.correct {
-            color: #1e90ff; /* Non-green color for correct */
+            color: #27ae60;
         }
         .feedback.wrong {
-            color: #ff4500; /* Non-red color for wrong */
+            color: #e74c3c;
+        }
+        .sentence {
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
         }
         .score {
             margin-top: 20px;
-            font-size: 18px;
-            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 5px 0;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #0056b3;
         }
+        button:disabled {
+            background-color: #b2bec3;
+            cursor: not-allowed;
+        }
         @media only screen and (max-width: 600px) {
             .container {
+                padding: 20px;
                 width: 100%;
-                padding: 15px;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 10px;
             }
         }
     </style>
@@ -109,7 +131,7 @@
         </div>
 
         <div class="progress">
-            <p>Question: <span id="currentQuestion">1</span>/45</p>
+            <p>Question: <span id="currentQuestion">1</span>/40</p>
         </div>
 
         <div class="feedback" id="feedback"></div>
@@ -118,7 +140,6 @@
 
         <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
         <button onclick="resetQuiz()">Reset Quiz</button>
-
     </div>
 
     <script>
@@ -166,8 +187,7 @@ const vocabList = [
 
 
 
-        
-        let currentQuestion = 0;
+let currentQuestion = 0;
 let score = 0;
 let incorrectAnswers = [];
 
@@ -176,27 +196,23 @@ function loadQuestion() {
     const options = document.getElementsByClassName('option');
     const currentVocab = vocabList[currentQuestion];
 
-    // Display the question
     questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
 
-    // Set correct answer in a random option
     let correctAnswerIndex = Math.floor(Math.random() * 4);
     options[correctAnswerIndex].innerText = currentVocab.definition;
 
-    // Filter out the correct answer and shuffle the wrong options
     let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
     wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
 
-    // Fill the remaining options with wrong answers
     let wrongIndex = 0;
     for (let i = 0; i < 4; i++) {
         if (i !== correctAnswerIndex) {
             options[i].innerText = wrongOptions[wrongIndex].definition;
             wrongIndex++;
         }
+        options[i].disabled = false;  // Ensure buttons are enabled
     }
 
-    // Reset feedback and next button
     document.getElementById('nextButton').style.display = "none";
     document.getElementById('feedback').innerText = '';
     document.getElementById('sentence').innerText = '';
@@ -214,25 +230,27 @@ function checkAnswer(selectedOption) {
     const options = document.getElementsByClassName('option');
     const feedbackElement = document.getElementById('feedback');
     const sentenceElement = document.getElementById('sentence');
-    
+
     if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
         feedbackElement.innerText = "Correct!";
         feedbackElement.classList.add("correct");
         feedbackElement.classList.remove("wrong");
         score++;
-        sentenceElement.innerText = vocabList[currentQuestion].sentence;
     } else {
         feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
         feedbackElement.classList.add("wrong");
         feedbackElement.classList.remove("correct");
-        sentenceElement.innerText = vocabList[currentQuestion].sentence;
-        
-        // Store the incorrect answer
         incorrectAnswers.push({
             word: vocabList[currentQuestion].word,
             correctAnswer: vocabList[currentQuestion].definition,
             userAnswer: options[selectedOption].innerText
         });
+    }
+
+    sentenceElement.innerText = vocabList[currentQuestion].sentence;
+
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = true;  // Disable all options after an answer is selected
     }
 
     document.getElementById('currentQuestion').innerText = currentQuestion + 1;
@@ -251,44 +269,39 @@ function nextQuestion() {
 }
 
 function displayIncorrectAnswers() {
-    // Create a new container with a unique ID for incorrect answers
     const container = document.createElement('div');
     container.id = 'incorrect-answers';
     container.innerHTML = `<h2>Incorrect Answers:</h2>`;
-    
-    // Loop through incorrect answers and display them
+
     incorrectAnswers.forEach(item => {
         const answer = document.createElement('p');
         answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
         container.appendChild(answer);
     });
+
     document.querySelector('.container').appendChild(container);
 }
 
 function resetQuiz() {
-    // Reset quiz state
     currentQuestion = 0;
     score = 0;
-    incorrectAnswers = []; // Reset incorrect answers array
+    incorrectAnswers = [];
     document.getElementById('score').innerText = '';
     document.getElementById('feedback').innerText = '';
     document.getElementById('feedback').classList.remove("correct", "wrong");
     document.getElementById('sentence').innerText = '';
 
-    // Remove the incorrect answers container by ID, if it exists
     const incorrectAnswersContainer = document.getElementById('incorrect-answers');
     if (incorrectAnswersContainer) {
         incorrectAnswersContainer.remove();
     }
 
-    // Load the first question
     loadQuestion();
 }
 
 window.onload = function () {
     loadQuestion();
 };
-        
     </script>
 
 </body>

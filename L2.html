@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        .quiz-section {
+            margin: 25px 0;
+        }
+        .question {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #34495e;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+        .progress {
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            color: #27ae60;
+        }
+        .feedback.wrong {
+            color: #e74c3c;
+        }
+        .sentence {
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #b2bec3;
+            cursor: not-allowed;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 100%;
+            }
+            .question {
+                font-size: 1.1rem;
+            }
+            .option {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vocabulary Quiz</h1>
+
+        <div class="quiz-section">
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option" onclick="checkAnswer(0)"></button>
+                <button class="option" onclick="checkAnswer(1)"></button>
+                <button class="option" onclick="checkAnswer(2)"></button>
+                <button class="option" onclick="checkAnswer(3)"></button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <p>Question: <span id="currentQuestion">1</span>/45</p>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="sentence" id="sentence"></div>
+        <div class="score" id="score"></div>
+
+        <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
+        <button onclick="resetQuiz()">Reset Quiz</button>
+    </div>
+
+    <script>
+const vocabList = [ 
+    { word: "Artifact", definition: "object made by human beings, either handmade or mass-produced", sentence: "Archaeologists debated the significance of the artifacts discovered in the ruins of Asia Minor but came to no conclusion about the culture they represented." },
+    { word: "Artisan", definition: "manually skilled worker; craftsman", sentence: "A noted artisan, Arturo was known for the fine craftsmanship of his inlaid cabinets." },
+    { word: "Ascendancy", definition: "controlling influence; domination", sentence: "Leaders of religious cults maintain ascendancy over their followers by methods that can verge on brainwashing." },
+    { word: "Ascetic", definition: "practicing self-denial; austere", sentence: "The wealthy, self-indulgent young man felt oddly drawn to the strict, ascetic life led by members of some monastic orders." },
+    { word: "Assiduous", definition: "diligent", sentence: "He was assiduous, working at this task for weeks before he felt satisfied with his results." },
+    { word: "Assimilate", definition: "absorb; cause to become homogeneous", sentence: "The manner in which the United States was able to assimilate the hordes of immigrants during the nineteenth and early twentieth centuries will always be a source of pride to Americans." },
+    { word: "Assuage", definition: "ease or lessen (pain); satisfy (hunger); soothe (anger)", sentence: "Jilted by Jane, Dick tried to assuage his heartache by indulging in ice cream." },
+    { word: "Astute", definition: "wise; shrewd; keen", sentence: "John Jacob Astor made astute investments in land, shrewdly purchasing valuable plots throughout New York City." },
+    { word: "Atrophy", definition: "waste away", sentence: "After three months in a cast, your calf muscles are bound to atrophy; you'll need physical therapy to get back in shape." },
+    { word: "Attribute", definition: "ascribe; explain", sentence: "I attribute her success in science to the encouragement she received from her parents." },
+    { word: "Audacious", definition: "daring; bold", sentence: "Audiences cheered as Luke Skywalker and Princess Leia made their audacious, death-defying leap to freedom." },
+    { word: "Augment", definition: "increase; add to", sentence: "Armies augment their forces by calling up reinforcements; teachers augment their salaries by taking odd jobs." },
+    { word: "Austere", definition: "forbiddingly stern; severely simple and unornamented", sentence: "The headmaster's austere demeanor tended to scare off the more timid students." },
+    { word: "Authoritarian", definition: "subordinating the individual to the state", sentence: "The leaders of the authoritarian regime ordered the suppression of the democratic protest movement." },
+    { word: "Autonomous", definition: "self-governing", sentence: "Although the University of California at Berkeley is just one part of the state university system, in many ways Cal Berkeley is autonomous." },
+    { word: "Avarice", definition: "greediness for wealth", sentence: "King Midas is a perfect example of avarice, for he wished everything he touched would turn to gold." },
+    { word: "Aversion", definition: "firm dislike", sentence: "Bert had an aversion to yuppies; Alex had an aversion to punks." },
+    { word: "Avert", definition: "prevent; turn away", sentence: "She averted her eyes from the dead cat on the highway." },
+    { word: "Beguile", definition: "mislead or delude; pass time", sentence: "With flattery and big talk of easy money, the con men beguiled Kyle into betting his allowance." },
+    { word: "Belle", definition: "contradict; give a false impression", sentence: "His coarse, hard-bitten exterior belied his inner sensitivity." },
+    { word: "Benevolent", definition: "generous; charitable", sentence: "Mr. Fezziwig was a benevolent employer, wishing to make Christmas merrier for his employees." },
+    { word: "Benign", definition: "kindly; favorable; not malignant", sentence: "Though her benign smile made Miss Marple seem sweet, she was a shrewd observer of human nature." },
+    { word: "Blatant", definition: "flagrant; conspicuously obvious", sentence: "The 'No Irish Need Apply' placard in the shop window was a blatant mark of prejudice." },
+    { word: "Bleak", definition: "cold or cheerless; unlikely to be favorable", sentence: "The frigid Aleutian Islands are bleak military outposts." },
+    { word: "Blighted", definition: "suffering from a disease; destroyed", sentence: "The extent of the blighted areas could be seen only when viewed from the air." },
+    { word: "Blithe", definition: "gay; joyous; carefree", sentence: "Without a care in the world, Beth went her blithe, lighthearted way." },
+    { word: "Bolster", definition: "support; reinforce", sentence: "The debaters amassed evidence to bolster their arguments." },
+    { word: "Braggart", definition: "boaster", sentence: "Modest by nature, she was no braggart, preferring to let her accomplishments speak for themselves." },
+    { word: "Brevity", definition: "conciseness", sentence: "Brevity is essential when sending a telegram, as you are charged for every word." },
+    { word: "Buttress", definition: "support; prop up", sentence: "The attorney attempted to buttress his weak case with far-fetched arguments." },
+    { word: "Cacophonous", definition: "discordant; inharmonious", sentence: "Do the students in the orchestra enjoy the cacophonous sounds they make when they're tuning up?" },
+    { word: "Calculated", definition: "deliberately planned; likely", sentence: "Lexy's choice of clothes to wear to the debate tournament was carefully calculated." },
+    { word: "Candor", definition: "frankness; open honesty", sentence: "Jack can carry candor too far; when he told Jill his honest opinion, she nearly slapped his face." },
+    { word: "Capricious", definition: "unpredictable; fickle", sentence: "The storm was capricious, changing course constantly." },
+    { word: "Carping", definition: "finding fault", sentence: "A carping critic loves to point out flaws." },
+    { word: "Censorious", definition: "critical", sentence: "Censorious people delight in casting blame." },
+    { word: "Censure", definition: "blame; criticize", sentence: "The senator was censured for behavior inappropriate to a member of Congress." },
+    { word: "Certitude", definition: "certainty", sentence: "Though there was no certitude of his getting the job, Lou thought he had a good chance." },
+    { word: "Charlatan", definition: "quack; pretender to knowledge", sentence: "When they realized that the Wizard didn't know how to get them back to Kansas, Dorothy and her companions were indignant that they'd been duped by a charlatan." },
+    { word: "Circumlocution", definition: "indirect or roundabout expression", sentence: "He resorted to circumlocutions to avoid direct reference to his subject." },
+    { word: "Coalesce", definition: "combine; fuse", sentence: "The brooks coalesce into one large river." },
+    { word: "Coercion", definition: "use of force to get someone to obey", sentence: "The inquisitors used both physical and psychological coercion to force Joan of Arc to deny her visions." },
+    { word: "Combustible", definition: "easily burned", sentence: "After the recent outbreak of fires, the fire commissioner ordered that all combustible materials be kept in safe containers." }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+function loadQuestion() {
+    const questionElement = document.getElementById('question');
+    const options = document.getElementsByClassName('option');
+    const currentVocab = vocabList[currentQuestion];
+
+    questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
+
+    let correctAnswerIndex = Math.floor(Math.random() * 4);
+    options[correctAnswerIndex].innerText = currentVocab.definition;
+
+    let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
+    wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
+
+    let wrongIndex = 0;
+    for (let i = 0; i < 4; i++) {
+        if (i !== correctAnswerIndex) {
+            options[i].innerText = wrongOptions[wrongIndex].definition;
+            wrongIndex++;
+        }
+        options[i].disabled = false;  // Ensure buttons are enabled
+    }
+
+    document.getElementById('nextButton').style.display = "none";
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('sentence').innerText = '';
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function checkAnswer(selectedOption) {
+    const options = document.getElementsByClassName('option');
+    const feedbackElement = document.getElementById('feedback');
+    const sentenceElement = document.getElementById('sentence');
+
+    if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
+        feedbackElement.innerText = "Correct!";
+        feedbackElement.classList.add("correct");
+        feedbackElement.classList.remove("wrong");
+        score++;
+    } else {
+        feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
+        feedbackElement.classList.add("wrong");
+        feedbackElement.classList.remove("correct");
+        incorrectAnswers.push({
+            word: vocabList[currentQuestion].word,
+            correctAnswer: vocabList[currentQuestion].definition,
+            userAnswer: options[selectedOption].innerText
+        });
+    }
+
+    sentenceElement.innerText = vocabList[currentQuestion].sentence;
+
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = true;  // Disable all options after an answer is selected
+    }
+
+    document.getElementById('currentQuestion').innerText = currentQuestion + 1;
+    document.getElementById('nextButton').style.display = "block";
+}
+
+function nextQuestion() {
+    if (currentQuestion < vocabList.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        document.getElementById('score').innerText = `You scored ${score} out of ${vocabList.length}`;
+        document.getElementById('nextButton').style.display = "none";
+        displayIncorrectAnswers();
+    }
+}
+
+function displayIncorrectAnswers() {
+    const container = document.createElement('div');
+    container.id = 'incorrect-answers';
+    container.innerHTML = `<h2>Incorrect Answers:</h2>`;
+
+    incorrectAnswers.forEach(item => {
+        const answer = document.createElement('p');
+        answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
+        container.appendChild(answer);
+    });
+
+    document.querySelector('.container').appendChild(container);
+}
+
+function resetQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    incorrectAnswers = [];
+    document.getElementById('score').innerText = '';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('feedback').classList.remove("correct", "wrong");
+    document.getElementById('sentence').innerText = '';
+
+    const incorrectAnswersContainer = document.getElementById('incorrect-answers');
+    if (incorrectAnswersContainer) {
+        incorrectAnswersContainer.remove();
+    }
+
+    loadQuestion();
+}
+
+window.onload = function () {
+    loadQuestion();
+};
+    </script>
+
+</body>
+</html>

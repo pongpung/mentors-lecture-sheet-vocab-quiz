@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #333;
+        }
+        .quiz-section {
+            margin: 20px 0;
+        }
+        .question {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            margin:10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .option:hover {
+            background-color: #0056b3;
+        }
+        .progress {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .feedback.correct {
+            color: #1e90ff; /* Non-green color for correct */
+        }
+        .feedback.wrong {
+            color: #ff4500; /* Non-red color for wrong */
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vocabulary Quiz</h1>
+
+        <div class="quiz-section">
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option" onclick="checkAnswer(0)"></button>
+                <button class="option" onclick="checkAnswer(1)"></button>
+                <button class="option" onclick="checkAnswer(2)"></button>
+                <button class="option" onclick="checkAnswer(3)"></button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <p>Question: <span id="currentQuestion">1</span>/45</p>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="sentence" id="sentence"></div>
+        <div class="score" id="score"></div>
+
+        <button id="nextButton" style="display:none;" onclick="nextQuestion()">Next Question</button>
+        <button onclick="resetQuiz()">Reset Quiz</button>
+
+    </div>
+
+    <script>
+const vocabList = [
+    { word: "Deleterious", definition: "harmful", sentence: "If you believe that smoking is deleterious to your health (and the Surgeon General certainly does), then quit!" },
+    { word: "Delineate", definition: "portray; depict; sketch", sentence: "Using only a few descriptive phrases, Austen delineates the character of Mr. Collins so well that we can predict his every move." },
+    { word: "Denounce", definition: "condemn; criticize", sentence: "The reform candidate denounced the corrupt city officers for having betrayed the public's trust." },
+    { word: "Deplore", definition: "regret; disapprove of", sentence: "Although I deplore the vulgarity of your language, I defend your right to express yourself freely." },
+    { word: "Depose", definition: "dethrone; remove from office", sentence: "The army attempted to depose the king and set up a military government." },
+    { word: "Deposition", definition: "testimony under oath", sentence: "He made his deposition in the judge's chamber." },
+    { word: "Depravity", definition: "extreme corruption; wickedness", sentence: "The depravity of Caligula's behavior came to sicken even those who had willingly participated in his earlier, comparatively innocent orgies." },
+    { word: "Deride", definition: "ridicule; make fun of", sentence: "The critics derided his pretentious dialogue and refused to consider his play seriously." },
+    { word: "Derivative", definition: "unoriginal; derived from another source", sentence: "Although her early poetry was clearly derivative in nature, the critics thought she had promise and eventually would find her own voice." },
+    { word: "Desiccate", definition: "dry up", sentence: "A tour of this smokehouse will give you an idea of how the pioneers used to desiccate food in order to preserve it." },
+    { word: "Despondent", definition: "depressed; gloomy", sentence: "To the dismay of his parents, William became seriously despondent after he broke up with Jan." },
+    { word: "Detached", definition: "emotionally removed; calm and objective; physically unconnected", sentence: "A psychoanalyst must maintain a detached point of view and stay uninvolved with his or her patients' personal lives." },
+    { word: "Deterrent", definition: "something that discourages; hindrance", sentence: "Does the threat of capital punishment serve as a deterrent to potential killers?" },
+    { word: "Detrimental", definition: "harmful; damaging", sentence: "The candidate's acceptance of major financial contributions from a well-known racist ultimately proved detrimental to his campaign." },
+    { word: "Devious", definition: "roundabout; erratic; not straightforward", sentence: "The Joker's plan was so devious that it was only with great difficulty we could follow its shifts and dodges." },
+    { word: "Devise", definition: "think up; invent; plan", sentence: "How clever he must be to have devised such a devious plan!" },
+    { word: "Diffidence", definition: "shyness", sentence: "You must overcome your diffidence if you intend to become a salesperson." },
+    { word: "Diffuse", definition: "wordy; rambling; spread out (like a gas)", sentence: "If you pay authors by the word, you tempt them to produce diffuse manuscripts rather than brief ones." },
+    { word: "Digression", definition: "wandering away from the subject", sentence: "Nobody minded when Professor Renoir's lectures wandered away from their official theme; his digressions were always more fascinating than the topic of the day." },
+    { word: "Diminution", definition: "lessening; reduction in size", sentence: "Old Jack was as sharp at eighty as he had been at fifty; increasing age led to no diminution of his mental acuity." },
+    { word: "Discerning", definition: "mentally quick and observant; having insight", sentence: "Though no genius, the star was sufficiently discerning to tell her true friends from the countless phonies who flattered her." },
+    { word: "Disclose", definition: "reveal", sentence: "Although competitors offered him bribes, he refused to disclose any information about his company's forthcoming product." },
+    { word: "Discordant", definition: "not harmonious; conflicting", sentence: "Nothing is quite so discordant as the sound of a junior high school orchestra tuning up." },
+    { word: "Discount", definition: "disregard; dismiss", sentence: "Be prepared to discount what he has to say about his ex-wife." },
+    { word: "Discourse", definition: "formal discussion; conversation", sentence: "The young Plato was drawn to the Agora to hear the philosophical discourse of Socrates and his followers." },
+    { word: "Discrepancy", definition: "lack of consistency; difference", sentence: "The police noticed some discrepancies in his description of the crime and did not believe him." },
+    { word: "Disdain", definition: "view with scorn or contempt", sentence: "In the film Funny Face, the bookish heroine disdained fashion models for their lack of intellectual interests." },
+    { word: "Disinclination", definition: "unwillingness", sentence: "Some mornings I feel a great disinclination to get out of bed." },
+    { word: "Dismiss", definition: "put away from consideration; reject", sentence: "Believing in John's love for her, she dismissed the notion that he might be unfaithful." },
+    { word: "Disparity", definition: "difference; condition of inequality", sentence: "Their disparity in rank made no difference at all to the prince and Cinderella." },
+    { word: "Disperse", definition: "scatter", sentence: "The police fired tear gas into the crowd to disperse the protesters." },
+    { word: "Disputatious", definition: "argumentative; fond of arguing", sentence: "Convinced he knew more than his lawyers, Alan was a disputatious client." },
+    { word: "Disseminate", definition: "distribute; spread; scatter (like seeds)", sentence: "By their use of the Internet, propagandists have been able to disseminate their pet doctrines to new audiences around the globe." },
+    { word: "Dissent", definition: "disagree", sentence: "In the recent Supreme Court decision, Justice O'Connor dissented from the majority opinion." },
+    { word: "Distill", definition: "extract the essence; purify; refine", sentence: "A moonshiner distills mash into whiskey." },
+    { word: "Divergent", definition: "differing; deviating", sentence: "Since graduating from medical school, the two doctors have taken divergent paths." },
+    { word: "Doctrine", definition: "teachings in general; particular principle (religious, legal, etc.) taught", sentence: "He was so committed to the doctrines of his faith that he was unable to evaluate them impartially." },
+    { word: "Dogmatic", definition: "opinionated; arbitrary; doctrinal", sentence: "We tried to discourage Doug from being so dogmatic, but never could convince him that his opinions might be wrong." },
+    { word: "Dubious", definition: "questionable; filled with doubt", sentence: "Many critics of the SAT contend the test is of dubious worth." }
+];
+
+
+
+        
+        let currentQuestion = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+function loadQuestion() {
+    const questionElement = document.getElementById('question');
+    const options = document.getElementsByClassName('option');
+    const currentVocab = vocabList[currentQuestion];
+
+    // Display the question
+    questionElement.innerText = `What is the definition of "${currentVocab.word}"?`;
+
+    // Set correct answer in a random option
+    let correctAnswerIndex = Math.floor(Math.random() * 4);
+    options[correctAnswerIndex].innerText = currentVocab.definition;
+
+    // Filter out the correct answer and shuffle the wrong options
+    let wrongOptions = vocabList.filter((_, index) => index !== currentQuestion);
+    wrongOptions = shuffleArray(wrongOptions).slice(0, 3);
+
+    // Fill the remaining options with wrong answers
+    let wrongIndex = 0;
+    for (let i = 0; i < 4; i++) {
+        if (i !== correctAnswerIndex) {
+            options[i].innerText = wrongOptions[wrongIndex].definition;
+            wrongIndex++;
+        }
+    }
+
+    // Reset feedback and next button
+    document.getElementById('nextButton').style.display = "none";
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('sentence').innerText = '';
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function checkAnswer(selectedOption) {
+    const options = document.getElementsByClassName('option');
+    const feedbackElement = document.getElementById('feedback');
+    const sentenceElement = document.getElementById('sentence');
+    
+    if (options[selectedOption].innerText === vocabList[currentQuestion].definition) {
+        feedbackElement.innerText = "Correct!";
+        feedbackElement.classList.add("correct");
+        feedbackElement.classList.remove("wrong");
+        score++;
+        sentenceElement.innerText = vocabList[currentQuestion].sentence;
+    } else {
+        feedbackElement.innerText = `Wrong! The correct answer is: ${vocabList[currentQuestion].definition}`;
+        feedbackElement.classList.add("wrong");
+        feedbackElement.classList.remove("correct");
+        sentenceElement.innerText = vocabList[currentQuestion].sentence;
+        
+        // Store the incorrect answer
+        incorrectAnswers.push({
+            word: vocabList[currentQuestion].word,
+            correctAnswer: vocabList[currentQuestion].definition,
+            userAnswer: options[selectedOption].innerText
+        });
+    }
+
+    document.getElementById('currentQuestion').innerText = currentQuestion + 1;
+    document.getElementById('nextButton').style.display = "block";
+}
+
+function nextQuestion() {
+    if (currentQuestion < vocabList.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        document.getElementById('score').innerText = `You scored ${score} out of ${vocabList.length}`;
+        document.getElementById('nextButton').style.display = "none";
+        displayIncorrectAnswers();
+    }
+}
+
+function displayIncorrectAnswers() {
+    // Create a new container with a unique ID for incorrect answers
+    const container = document.createElement('div');
+    container.id = 'incorrect-answers';
+    container.innerHTML = `<h2>Incorrect Answers:</h2>`;
+    
+    // Loop through incorrect answers and display them
+    incorrectAnswers.forEach(item => {
+        const answer = document.createElement('p');
+        answer.innerText = `Word: ${item.word}\nYour Answer: ${item.userAnswer}\nCorrect Answer: ${item.correctAnswer}`;
+        container.appendChild(answer);
+    });
+    document.querySelector('.container').appendChild(container);
+}
+
+function resetQuiz() {
+    // Reset quiz state
+    currentQuestion = 0;
+    score = 0;
+    incorrectAnswers = []; // Reset incorrect answers array
+    document.getElementById('score').innerText = '';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('feedback').classList.remove("correct", "wrong");
+    document.getElementById('sentence').innerText = '';
+
+    // Remove the incorrect answers container by ID, if it exists
+    const incorrectAnswersContainer = document.getElementById('incorrect-answers');
+    if (incorrectAnswersContainer) {
+        incorrectAnswersContainer.remove();
+    }
+
+    // Load the first question
+    loadQuestion();
+}
+
+window.onload = function () {
+    loadQuestion();
+};
+        
+    </script>
+
+</body>
+</html>

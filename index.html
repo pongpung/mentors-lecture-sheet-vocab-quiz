@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>Vocab Quiz by Zamiur</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,81 +13,109 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #74ebd5, #acb6e5); /* Adjusted angle for a better gradient */
-            color: #34495e; /* Adjusted font color */
-            text-align: center; /* Ensure all text is centered */
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            color: #34495e;
+            text-align: center;
         }
+
         h1 {
-            font-size: 4rem; /* Responsive font size */
+            font-size: 4rem;
             margin-bottom: 20px;
             color: #2c3e50;
-            letter-spacing: 1px; /* Improved readability */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Soft shadow for title */
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
+
         img {
-            width: 180px; /* Increased image size for better focus */
-            height: auto;
-            border-radius: 50%; /* Circular image */
-            border: 5px solid white; /* White border around the image */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Stronger shadow effect */
-            transition: transform 0.4s ease; /* Smooth transition on hover */
-            margin-bottom: 20px; /* Better spacing between image and buttons */
+            width: 180px;
+            height: 180px; /* Defined image height for better performance */
+            object-fit: cover; /* Ensures image maintains aspect ratio */
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease;
+            margin-bottom: 20px;
         }
+
         img:hover {
-            transform: scale(1.1); /* Image enlarges on hover */
+            transform: scale(1.1);
         }
+
         .button {
             display: inline-block;
             padding: 15px 35px;
-            font-size: 1.4em; /* More readable font size */
+            font-size: 1.4em;
             color: white;
             background-color: #3498db;
             border: none;
-            border-radius: 30px; /* Rounded button corners */
+            border-radius: 30px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
             text-decoration: none;
-            margin: 10px; /* Adjusted margin for better spacing */
-            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+            margin: 10px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
+
         .button:hover {
             background-color: #2980b9;
-            transform: translateY(-6px); /* Increased hover effect */
+            transform: translateY(-6px);
         }
+
         .button:active {
-            transform: translateY(3px); /* Slight downward movement when clicked */
+            transform: translateY(3px);
         }
+
         .button-container {
             display: flex;
-            flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
-            justify-content: center; /* Center the buttons */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px; /* Added gap for consistent button spacing */
         }
+
+        footer {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #34495e;
+        }
+
         @media (max-width: 768px) {
             h1 {
-                font-size: 3rem; /* Adjusted title size for smaller screens */
+                font-size: 3rem;
             }
+
             .button {
-                font-size: 1.2em; /* Smaller buttons on mobile devices */
-                padding: 12px 25px; /* Adjust button padding */
+                font-size: 1.2em;
+                padding: 12px 25px;
             }
+
             img {
-                width: 140px; /* Smaller image for mobile */
+                width: 140px;
+                height: 140px; /* Match the new width for consistency */
             }
         }
     </style>
 </head>
 <body>
-    <h1>Vocab by Zamiur</h1>
-    <img src="https://scontent.fdac24-2.fna.fbcdn.net/v/t39.30808-1/454475977_1680171446126988_8002232896963534412_n.jpg?stp=dst-jpg_s200x200&_nc_cat=108&ccb=1-7&_nc_sid=0ecb9b&_nc_ohc=iTSx0kldkuoQ7kNvgEQqazP&_nc_zt=24&_nc_ht=scontent.fdac24-2.fna&_nc_gid=A9JIwbYSs6OJzUSz0xqpkNy&oh=00_AYBJWvnoPalBUBtBr1W9fSA6afNuR4aOoV3pragy15FYqg&oe=671ACF17" alt="Creator's Image"> <!-- Update the src with the actual image of the creator -->
-    
-    <div class="button-container">
-        <a href="L1.html" class="button">L-1</a>
-        <a href="L2.html" class="button">L-2</a>
-        <a href="L3.html" class="button">L-3</a>
-        <a href="L4.html" class="button">L-4</a>
-        <a href="L5.html" class="button">L-5</a>
-        <a href="L6.html" class="button">L-6</a>
-        <a href="L7.html" class="button">L-7</a>
-    </div>
+    <header>
+        <h1>Vocab Quiz by Zamiur</h1>
+    </header>
+
+    <main role="main">
+        <img src="https://scontent.fdac24-2.fna.fbcdn.net/v/t39.30808-1/454475977_1680171446126988_8002232896963534412_n.jpg?stp=dst-jpg_s200x200&_nc_cat=108&ccb=1-7&_nc_sid=0ecb9b&_nc_ohc=iTSx0kldkuoQ7kNvgEQqazP&_nc_zt=24&_nc_ht=scontent.fdac24-2.fna&_nc_gid=A9JIwbYSs6OJzUSz0xqpkNy&oh=00_AYBJWvnoPalBUBtBr1W9fSA6afNuR4aOoV3pragy15FYqg&oe=671ACF17" alt="Image of Zamiur, the creator" width="180" height="180">
+        
+        <div class="button-container" role="navigation" aria-label="Quiz level navigation">
+            <a href="L1.html" class="button" aria-label="Level 1 Quiz">L-1</a>
+            <a href="L2.html" class="button" aria-label="Level 2 Quiz">L-2</a>
+            <a href="L3.html" class="button" aria-label="Level 3 Quiz">L-3</a>
+            <a href="L4.html" class="button" aria-label="Level 4 Quiz">L-4</a>
+            <a href="L5.html" class="button" aria-label="Level 5 Quiz">L-5</a>
+            <a href="L6.html" class="button" aria-label="Level 6 Quiz">L-6</a>
+            <a href="L7.html" class="button" aria-label="Level 7 Quiz">L-7</a>
+        </div>
+    </main>
+
+    <footer>
+        Resources are taken from MENTORS lecture sheet.
+    </footer>
 </body>
 </html>
